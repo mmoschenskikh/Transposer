@@ -1,0 +1,13 @@
+.idea/*.xml
+.idea/.name
+.idea/copyright
+.idea/libraries
+.idea/shelf
+target
+out
+build/*
+report/*
+
+*.iml
+*.ipr
+*.iws
