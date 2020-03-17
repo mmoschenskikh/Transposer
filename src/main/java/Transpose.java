@@ -13,7 +13,7 @@ public class Transpose {
     private File inputFile;
 
     @Option(name = "-a", usage = "Width of a field for a word.")
-    private int num = 10;
+    private Integer num;
 
     @Option(name = "-t", usage = "Cuts words if they don't fit in the size set by '-a'.")
     private boolean cutWords = false;
@@ -70,8 +70,20 @@ public class Transpose {
             while (line != null) {
                 if (!line.isBlank()) {
                     ArrayList<String> row = new ArrayList<>(Arrays.asList(line.trim().split(" +")));
-                    if (cutWords) {
-                        cut(row, num);
+                    if (num != null && num < 1) {
+                        throw new IllegalArgumentException();
+                    }
+                    if (!alignRight && !cutWords && num != null) {
+                        addSpace(row, num);
+                    } else {
+                        num = (num != null) ? num : 10;
+                        if (cutWords) {
+                            cut(row, num);
+                            addSpace(row, num);
+                        }
+                        if (alignRight) {
+                            align(row, num);
+                        }
                     }
                     words.add(row);
                     maxLength = Integer.max(maxLength, row.size());
@@ -90,6 +102,9 @@ public class Transpose {
             if (size < maxLength) {
                 row.addAll(end.subList(0, maxLength - size));
             }
+        }
+        if (words.isEmpty()) {
+            throw new IOException("Input file is empty");
         }
         return words;
     }
@@ -118,6 +133,24 @@ public class Transpose {
             StringBuilder word = new StringBuilder().append(row.get(i));
             if (word.length() > width) {
                 row.set(i, word.delete(width, word.length()).toString());
+            }
+        }
+    }
+
+    private void align(ArrayList<String> row, int width) {
+        for (int i = 0; i < row.size(); i++) {
+            StringBuilder word = new StringBuilder().append(row.get(i));
+            if (word.length() < width) {
+                row.set(i, word.insert(0, " ".repeat(width - word.length())).toString());
+            }
+        }
+    }
+
+    private void addSpace(ArrayList<String> row, int width) {
+        for (int i = 0; i < row.size(); i++) {
+            StringBuilder word = new StringBuilder().append(row.get(i));
+            if (word.length() < width) {
+                row.set(i, word.append(" ".repeat(width - word.length())).toString());
             }
         }
     }
