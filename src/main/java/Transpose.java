@@ -13,7 +13,7 @@ public class Transpose {
     private File inputFile;
 
     @Option(name = "-a", usage = "Width of a field for a word.")
-    private int num;
+    private int num = 10;
 
     @Option(name = "-t", usage = "Cuts words if they don't fit in the size set by '-a'.")
     private boolean cutWords = false;
@@ -58,6 +58,7 @@ public class Transpose {
         BufferedReader input = (inputFile == null) ? new BufferedReader(new InputStreamReader(System.in)) : new BufferedReader(new FileReader(inputFile));
         BufferedWriter output = (outputFile == null) ? new BufferedWriter(new OutputStreamWriter(System.out)) : new BufferedWriter(new FileWriter(outputFile));
 
+        writeWords(readWords(input), output);
     }
 
     private ArrayList<ArrayList<String>> readWords(BufferedReader in) throws IOException {
@@ -69,6 +70,9 @@ public class Transpose {
             while (line != null) {
                 if (!line.isBlank()) {
                     ArrayList<String> row = new ArrayList<>(Arrays.asList(line.trim().split(" +")));
+                    if (cutWords) {
+                        cut(row, num);
+                    }
                     words.add(row);
                     maxLength = Integer.max(maxLength, row.size());
                 }
@@ -105,6 +109,15 @@ public class Transpose {
                 }
                 out.write(line.toString());
                 out.newLine();
+            }
+        }
+    }
+
+    private void cut(ArrayList<String> row, int width) {
+        for (int i = 0; i < row.size(); i++) {
+            StringBuilder word = new StringBuilder().append(row.get(i));
+            if (word.length() > width) {
+                row.set(i, word.delete(width, word.length()).toString());
             }
         }
     }
