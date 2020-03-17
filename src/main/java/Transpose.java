@@ -12,8 +12,14 @@ public class Transpose {
     private File outputFile;
     private File inputFile;
 
+    private boolean numSet = false;
+    private int num = 10;
+
     @Option(name = "-a", usage = "Width of a field for a word.")
-    private Integer num;
+    private void setNum(int number) {
+        num = number;
+        numSet = true;
+    }
 
     @Option(name = "-t", usage = "Cuts words if they don't fit in the size set by '-a'.")
     private boolean cutWords = false;
@@ -64,26 +70,23 @@ public class Transpose {
     private ArrayList<ArrayList<String>> readWords(BufferedReader in) throws IOException {
         ArrayList<ArrayList<String>> words = new ArrayList<>();
         int maxLength = 0;
-
         try (in) {
             String line = in.readLine();
             while (line != null) {
                 if (!line.isBlank()) {
                     ArrayList<String> row = new ArrayList<>(Arrays.asList(line.trim().split(" +")));
-                    if (num != null && num < 1) {
+                    if (numSet && num < 1) {
                         throw new IllegalArgumentException();
                     }
-                    if (!alignRight && !cutWords && num != null) {
+
+                    if (cutWords) {
+                        cut(row, num);
+                    }
+                    if (alignRight) {
+                        align(row, num);
+                    }
+                    if (!alignRight && numSet) {
                         addSpace(row, num);
-                    } else {
-                        num = (num != null) ? num : 10;
-                        if (cutWords) {
-                            cut(row, num);
-                            addSpace(row, num);
-                        }
-                        if (alignRight) {
-                            align(row, num);
-                        }
                     }
                     words.add(row);
                     maxLength = Integer.max(maxLength, row.size());
