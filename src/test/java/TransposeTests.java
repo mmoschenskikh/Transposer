@@ -2,6 +2,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.*;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TransposeTests {
@@ -110,9 +111,11 @@ public class TransposeTests {
                 "ДЕЛА    ПОЖАЛУЙ КВАТЕРН ШКОЙ    СИСТЕМА\n" +
                 "КОНТРОЛ\n" +
                 "ВЕРСИЙ ";
-        final String second_a2_t = "СТ ДЕ ЧЕ КА\n" +
-                "ПЕ ПЕ ТИ";
-        transposeTest("-a 7 -t", "-a 2 -t", first_a7_t, second_a2_t);
+        final String second_a1_t = "С Д Ч К\n" +
+                "П П Т";
+        transposeTest("-a 7 -t", "-a 1 -t", first_a7_t, second_a1_t);
+
+
     }
 
     @Test
@@ -137,5 +140,15 @@ public class TransposeTests {
         final String second_a4_r_t = " СТУ  ДЕН  ЧЕС  КАЯ\n" +
                 "ПЕРС  ПЕК ТИВА";
         transposeTest("-a 9 -r -t", "-a 4 -t -r", first_a9_r_t, second_a4_r_t);
+    }
+
+    @Test
+    public void negativeNumber() {
+        assertThrows(IllegalArgumentException.class, () -> Transpose.main("-a -1 txt/first.txt".split(" ")));
+    }
+
+    @Test
+    public void emptyFile() {
+        assertThrows(IOException.class, () -> Transpose.main("-a 1337 -r -t txt/spaces_only.txt".split(" ")));
     }
 }

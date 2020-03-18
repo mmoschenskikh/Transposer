@@ -32,7 +32,7 @@ public class Transpose {
         if (file.exists() && file.canWrite() || file.createNewFile()) {
             outputFile = file;
         } else {
-            throw new FileNotFoundException();
+            throw new IOException("Can't write to the specified output file.");
         }
     }
 
@@ -41,7 +41,7 @@ public class Transpose {
         if (file.exists() && file.isFile() && file.canRead()) {
             inputFile = file;
         } else {
-            throw new FileNotFoundException();
+            throw new FileNotFoundException("Can't read the specified input file.");
         }
     }
 
@@ -68,6 +68,9 @@ public class Transpose {
     }
 
     private ArrayList<ArrayList<String>> readWords(BufferedReader in) throws IOException {
+        if (num < 1) {
+            throw new IllegalArgumentException("Incorrect value for '-a'. It must be >= 1.");
+        }
         ArrayList<ArrayList<String>> words = new ArrayList<>();
         int maxLength = 0;
         try (in) {
@@ -75,21 +78,12 @@ public class Transpose {
             while (line != null) {
                 if (!line.isBlank()) {
                     ArrayList<String> row = new ArrayList<>(Arrays.asList(line.trim().split(" +")));
-                    if (numSet && num < 1) {
-                        throw new IllegalArgumentException();
+                    if (cutWords) {
+                        cut(row, num);
                     }
                     if (alignRight) {
                         align(row, num);
-                        if (cutWords) {
-                            cut(row, num);
-                        }
-                    } else {
-                        if (cutWords) {
-                            cut(row, num);
-                            addSpace(row, num);
-                        }
-                    }
-                    if (numSet) {
+                    } else if (numSet || cutWords) {
                         addSpace(row, num);
                     }
                     words.add(row);
@@ -111,7 +105,7 @@ public class Transpose {
             }
         }
         if (words.isEmpty()) {
-            throw new IOException("Input file is empty");
+            throw new IOException("Input file is empty.");
         }
         return words;
     }
