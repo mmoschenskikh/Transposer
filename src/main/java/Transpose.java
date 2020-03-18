@@ -78,7 +78,6 @@ public class Transpose {
                     if (numSet && num < 1) {
                         throw new IllegalArgumentException();
                     }
-
                     if (cutWords) {
                         cut(row, num);
                     }
@@ -113,19 +112,18 @@ public class Transpose {
     }
 
     private void writeWords(ArrayList<ArrayList<String>> words, BufferedWriter out) throws IOException {
-        final int rows = words.size();
         final int columns = words.get(0).size();
         try (out) {
             for (int i = 0; i < columns; i++) {
                 StringBuilder line = new StringBuilder();
-                for (int j = 0; j < rows; j++) {
-                    String word = words.get(j).get(i);
+                for (ArrayList<String> strings : words) {
+                    String word = strings.get(i);
                     if (!word.isEmpty()) {
                         line.append(word);
-                        line.append((j == rows - 1) ? "" : " ");
+                        line.append(" ");
                     }
                 }
-                out.write(line.toString());
+                out.write(line.deleteCharAt(line.length() - 1).toString());
                 out.newLine();
             }
         }
