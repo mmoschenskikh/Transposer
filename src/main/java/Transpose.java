@@ -78,13 +78,18 @@ public class Transpose {
                     if (numSet && num < 1) {
                         throw new IllegalArgumentException();
                     }
-                    if (cutWords) {
-                        cut(row, num);
-                    }
                     if (alignRight) {
                         align(row, num);
+                        if (cutWords) {
+                            cut(row, num);
+                        }
+                    } else {
+                        if (cutWords) {
+                            cut(row, num);
+                            addSpace(row, num);
+                        }
                     }
-                    if (!alignRight && numSet) {
+                    if (numSet) {
                         addSpace(row, num);
                     }
                     words.add(row);
