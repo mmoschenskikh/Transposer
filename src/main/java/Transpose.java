@@ -18,6 +18,9 @@ public class Transpose {
     @Option(name = "-a", usage = "Width of a field for a word.")
     private void setNum(int number) {
         num = number;
+        if (num < 1) {
+            throw new IllegalArgumentException("Incorrect value for '-a'. It must be >= 1.");
+        }
         numSet = true;
     }
 
@@ -68,9 +71,6 @@ public class Transpose {
     }
 
     private ArrayList<ArrayList<String>> readWords(BufferedReader in) throws IOException {
-        if (num < 1) {
-            throw new IllegalArgumentException("Incorrect value for '-a'. It must be >= 1.");
-        }
         ArrayList<ArrayList<String>> words = new ArrayList<>();
         int maxLength = 0;
         try (in) {
@@ -78,14 +78,7 @@ public class Transpose {
             while (line != null) {
                 if (!line.isBlank()) {
                     ArrayList<String> row = new ArrayList<>(Arrays.asList(line.trim().split(" +")));
-                    if (cutWords) {
-                        cut(row, num);
-                    }
-                    if (alignRight) {
-                        align(row, num);
-                    } else if (numSet || cutWords) {
-                        addSpace(row, num);
-                    }
+                    formatText(row, num, numSet, alignRight, cutWords);
                     words.add(row);
                     maxLength = Integer.max(maxLength, row.size());
                 }
@@ -128,29 +121,20 @@ public class Transpose {
         }
     }
 
-    private void cut(ArrayList<String> row, int width) {
+    private void formatText(ArrayList<String> row, int width, boolean addSpace, boolean align, boolean cut) {
         for (int i = 0; i < row.size(); i++) {
             StringBuilder word = new StringBuilder().append(row.get(i));
-            if (word.length() > width) {
-                row.set(i, word.delete(width, word.length()).toString());
+            int length = word.length();
+            if (cut) {
+                if (length > width) {
+                    row.set(i, word.delete(width, length).toString());
+                }
             }
-        }
-    }
-
-    private void align(ArrayList<String> row, int width) {
-        for (int i = 0; i < row.size(); i++) {
-            StringBuilder word = new StringBuilder().append(row.get(i));
-            if (word.length() < width) {
-                row.set(i, word.insert(0, " ".repeat(width - word.length())).toString());
-            }
-        }
-    }
-
-    private void addSpace(ArrayList<String> row, int width) {
-        for (int i = 0; i < row.size(); i++) {
-            StringBuilder word = new StringBuilder().append(row.get(i));
-            if (word.length() < width) {
-                row.set(i, word.append(" ".repeat(width - word.length())).toString());
+            if (addSpace || align || cut) {
+                int pos = align ? 0 : length;
+                if (length < width) {
+                    row.set(i, word.insert(pos, " ".repeat(width - length)).toString());
+                }
             }
         }
     }
